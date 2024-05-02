@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PackageId>PolestarSharp</PackageId>
+        <PackageVersion>$([System.DateTime]::Now.ToString("yyyy.MM.dd.1"))</PackageVersion>
+        <Authors>James Coverdale</Authors>
+        <Company>James Coverdale</Company>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="README.md" Pack="true" PackagePath="\"/>        
+    </ItemGroup>
+
+</Project>
