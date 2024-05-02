@@ -3,7 +3,7 @@ A small dotnet library to help access the Polestar web api.
 
 ### Usage
 
-- Install the nuget package: `nuget install PolestarSharp`
+- Install the nuget package: `dotnet add package PolestarSharp`
 - Perform a login and data request:
 ```c#
 var api = new PolestarApi("email", "password", "vin");
