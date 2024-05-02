@@ -10,6 +10,11 @@
         <Company>James Coverdale</Company>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>Polestar</PackageTags>
+        <Description>
+            A small dotnet library for requesting data from the Polestar web api.
+        </Description>
+        <projectUrl>https://github.com/jamescoverdale/PolestarSharp</projectUrl>
     </PropertyGroup>
 
     <ItemGroup>
