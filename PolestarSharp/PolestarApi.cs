@@ -16,7 +16,7 @@ public class PolestarApi
     private const string POLESTAR_API_URL = $"{POLESTAR_BASE_URL}/my-star";
 
     private readonly HttpClient _httpClient;
-    private Token _token;
+    public Token Token;
 
     public PolestarApi(string username, string password, string vin)
     {
@@ -37,7 +37,7 @@ public class PolestarApi
         try
         {
             var apitoken = await GetAccessToken();
-            _token = apitoken;
+            Token = apitoken;
             return true;
         }
         catch (Exception e)
@@ -138,7 +138,7 @@ public class PolestarApi
 
             if (useAuth)
             {
-                request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {_token.access_token}");
+                request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {Token.access_token}");
             }
 
             var response = await _httpClient.SendAsync(request);
