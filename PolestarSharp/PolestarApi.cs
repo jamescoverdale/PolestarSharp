@@ -7,6 +7,8 @@ namespace PolestarSharp;
 
 public class PolestarApi
 {
+    public DateTime TokenExpiryDateTimeUtc = DateTime.MinValue;
+    
     private readonly string _username;
     private readonly string _password;
     private readonly string _vin;
@@ -16,7 +18,7 @@ public class PolestarApi
     private const string POLESTAR_API_URL = $"{POLESTAR_BASE_URL}/my-star";
 
     private readonly HttpClient _httpClient;
-    public Token Token;
+    private Token _token;
 
     public PolestarApi(string username, string password, string vin)
     {
@@ -37,7 +39,8 @@ public class PolestarApi
         try
         {
             var apitoken = await GetAccessToken();
-            Token = apitoken;
+            _token = apitoken;
+            TokenExpiryDateTimeUtc = DateTime.UtcNow.AddSeconds(_token.expires_in);
             return true;
         }
         catch (Exception e)
@@ -138,7 +141,7 @@ public class PolestarApi
 
             if (useAuth)
             {
-                request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {Token.access_token}");
+                request.Headers.TryAddWithoutValidation("Authorization", $"Bearer {_token.access_token}");
             }
 
             var response = await _httpClient.SendAsync(request);
