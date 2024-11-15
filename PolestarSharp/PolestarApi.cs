@@ -16,6 +16,7 @@ public class PolestarApi
     private const string POLESTAR_BASE_URL = "https://pc-api.polestar.com/eu-north-1";
     private const string POLESTAR_API_URL_V2 = $"{POLESTAR_BASE_URL}/mystar-v2";
     private const string POLESTAR_API_URL = $"{POLESTAR_BASE_URL}/my-star";
+    private const string CLIENT_ID = "l3oopkc_10";
 
     private readonly HttpClient _httpClient;
     private Token _token;
@@ -74,7 +75,7 @@ public class PolestarApi
 
     private async Task<string> GetLoginFlowTokens()
     {
-        string url = "https://polestarid.eu.polestar.com/as/authorization.oauth2?response_type=code&client_id=polmystar&redirect_uri=https://www.polestar.com%2Fsign-in-callback&scope=openid+profile+email+customer%3Aattributes";
+        string url = $"https://polestarid.eu.polestar.com/as/authorization.oauth2?response_type=code&client_id={CLIENT_ID}&redirect_uri=https://www.polestar.com%2Fsign-in-callback&scope=openid+profile+email+customer%3Aattributes";
         
         var data = await _httpClient.GetAsync(url);
         var resp = data.RequestMessage.RequestUri.AbsoluteUri;
@@ -105,8 +106,33 @@ public class PolestarApi
 
         var response = await _httpClient.PostAsync(url, content);
         var urlResp = response.RequestMessage.RequestUri.AbsoluteUri;
-        var data = Regex.Match(urlResp, "code=([^&]+)").Groups.Values.ElementAt(1);
+        var data = Regex.Match(urlResp, "code=([^&]+)");
+        var uid = Regex.Match(urlResp, "uid=([^&]+)").Groups.Values.ElementAt(1);
+        
+        if(data.Success == false)
+            return await AcceptTermsOfService(uid.Value, pathToken);
 
+        return data.Groups.Values.ElementAt(1).Value;
+    }
+
+    private async Task<string> AcceptTermsOfService(string uid, string pathToken)
+    {
+        string url = $"https://polestarid.eu.polestar.com/as/{pathToken}/resume/as/authorization.ping";
+        
+        var formData = new List<KeyValuePair<string, string>>
+        {
+            new ("pf.submit", "True"),
+            new ("subject", uid)
+        };
+
+        // Encodes the key-value pairs for the ContentType 'application/x-www-form-urlencoded'
+        HttpContent content = new FormUrlEncodedContent(formData);
+
+        var response = await _httpClient.PostAsync(url, content);
+        var urlResp = response.RequestMessage.RequestUri.AbsoluteUri;
+        
+        var data = Regex.Match(urlResp, "code=([^&]+)").Groups.Values.ElementAt(1);
+        
         return data.Value;
     }
     
