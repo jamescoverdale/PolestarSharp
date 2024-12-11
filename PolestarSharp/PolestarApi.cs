@@ -14,9 +14,11 @@ public class PolestarApi
     private readonly string _vin;
     
     private const string POLESTAR_BASE_URL = "https://pc-api.polestar.com/eu-north-1";
+    private const string POLESTAR_REDIRECT_URI = "https://www.polestar.com/sign-in-callback";
     private const string POLESTAR_API_URL_V2 = $"{POLESTAR_BASE_URL}/mystar-v2";
-    private const string POLESTAR_API_URL = $"{POLESTAR_BASE_URL}/my-star";
     private const string CLIENT_ID = "l3oopkc_10";
+    private const string CODE_VERIFIER = "2024-polestarsharp-dotnet-client-polestar-2024";
+    private const string CODE_CHALLENGE = "GmU_FRSNd3V-b6HiKuEQ3sEJCkt8IQjNz0CLb_sDsZs";
 
     private readonly HttpClient _httpClient;
     private Token _token;
@@ -75,7 +77,14 @@ public class PolestarApi
 
     private async Task<string> GetLoginFlowTokens()
     {
-        string url = $"https://polestarid.eu.polestar.com/as/authorization.oauth2?response_type=code&client_id={CLIENT_ID}&redirect_uri=https://www.polestar.com%2Fsign-in-callback&scope=openid+profile+email+customer%3Aattributes";
+        string url = $"https://polestarid.eu.polestar.com/as/authorization.oauth2" +
+                     $"?response_type=code" +
+                     $"&client_id={CLIENT_ID}" +
+                     $"&redirect_uri=https://www.polestar.com%2Fsign-in-callback" +
+                     $"&scope=openid+profile+email+customer%3Aattributes" +
+                     $"&state=ea5aa2860f894a9287a4819dd5ada85c" +
+                     $"&code_challenge={CODE_CHALLENGE}" +
+                     $"&code_challenge_method=S256";
         
         var data = await _httpClient.GetAsync(url);
         var resp = data.RequestMessage.RequestUri.AbsoluteUri;
@@ -93,7 +102,7 @@ public class PolestarApi
 
     private async Task<string> PerformLogin(string pathToken)
     {
-        string url = $"https://polestarid.eu.polestar.com/as/{pathToken}/resume/as/authorization.ping";
+        string url = $"https://polestarid.eu.polestar.com/as/{pathToken}/resume/as/authorization.ping?client_id={CLIENT_ID}";
         
         var formData = new List<KeyValuePair<string, string>>
         {
@@ -107,17 +116,17 @@ public class PolestarApi
         var response = await _httpClient.PostAsync(url, content);
         var urlResp = response.RequestMessage.RequestUri.AbsoluteUri;
         var data = Regex.Match(urlResp, "code=([^&]+)");
-        var uid = Regex.Match(urlResp, "uid=([^&]+)").Groups.Values.ElementAt(1);
+        var uidMatch = Regex.Match(urlResp, "uid=([^&]+)");
         
-        if(data.Success == false)
-            return await AcceptTermsOfService(uid.Value, pathToken);
+        if(data.Success == false && uidMatch.Success)
+            return await AcceptTermsOfService(uidMatch.Groups?.Values?.ElementAt(1).Value, pathToken);
 
         return data.Groups.Values.ElementAt(1).Value;
     }
 
     private async Task<string> AcceptTermsOfService(string uid, string pathToken)
     {
-        string url = $"https://polestarid.eu.polestar.com/as/{pathToken}/resume/as/authorization.ping";
+        string url = $"https://polestarid.eu.polestar.com/as/{pathToken}/resume/as/authorization.ping?client_id={CLIENT_ID}";
         
         var formData = new List<KeyValuePair<string, string>>
         {
@@ -138,14 +147,29 @@ public class PolestarApi
     
     private async Task<Token> GetApiToken(string tokenRequestCode)
     {
-        var query = "query getAuthToken($code: String!) { getAuthToken(code: $code) { id_token access_token refresh_token expires_in } }";
-        var response = await SendQuery<Auth>($"{POLESTAR_BASE_URL}/auth", query, "getAuthToken", new { code = tokenRequestCode }, false);
+        var tokenEndpoint = "https://polestarid.eu.polestar.com/as/token.oauth2";
+
+        var requestBody = new Dictionary<string, string>
+        {
+            { "grant_type", "authorization_code" },
+            { "code", tokenRequestCode },
+            { "code_verifier", CODE_VERIFIER },
+            { "client_id", CLIENT_ID },
+            { "redirect_uri", POLESTAR_REDIRECT_URI }
+        };
+
+        var content = new FormUrlEncodedContent(requestBody);
+        var response = await _httpClient.PostAsync(tokenEndpoint, content);
+
+        response.EnsureSuccessStatusCode();
+
+        var apiCreds = await response.Content.ReadFromJsonAsync<GetAuthToken>();
         
         return new Token()
         {
-            access_token = response.data.getAuthToken.access_token,
-            refresh_token = response.data.getAuthToken.refresh_token,
-            expires_in = response.data.getAuthToken.expires_in
+            access_token = apiCreds.access_token,
+            refresh_token = apiCreds.refresh_token,
+            expires_in = apiCreds.expires_in
         };
     }
 
