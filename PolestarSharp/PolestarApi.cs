@@ -53,28 +53,51 @@ public class PolestarApi
         }
     }
 
-    public async Task<BatteryData> GetBatteryInfo()
-    {
-        var battery = await SendQuery<BatteryData>(
+    public async Task<CarTelematicsData> GetCarTelematics()
+    { 
+        var carTelematics = await SendQuery<CarTelematicsData>(
             POLESTAR_API_URL_V2,
-            "query GetBatteryData($vin: String!) { getBatteryData(vin: $vin) { averageEnergyConsumptionKwhPer100Km batteryChargeLevelPercentage chargerConnectionStatus chargingCurrentAmps chargingPowerWatts chargingStatus estimatedChargingTimeMinutesToTargetDistance estimatedChargingTimeToFullMinutes estimatedDistanceToEmptyKm estimatedDistanceToEmptyMiles eventUpdatedTimestamp { iso unix __typename } __typename } }",
+            """
+            query CarTelematics($vin:String!) {
+                carTelematics(vin: $vin) {
+                    health {
+                        brakeFluidLevelWarning
+                        daysToService
+                        distanceToServiceKm
+                        engineCoolantLevelWarning
+                        eventUpdatedTimestamp { iso unix }
+                        oilLevelWarning
+                        serviceWarning
+                    }
+                    battery {
+                        averageEnergyConsumptionKwhPer100Km
+                        batteryChargeLevelPercentage
+                        chargerConnectionStatus
+                        chargingCurrentAmps
+                        chargingPowerWatts
+                        chargingStatus
+                        estimatedChargingTimeMinutesToTargetDistance
+                        estimatedChargingTimeToFullMinutes
+                        estimatedDistanceToEmptyKm
+                        estimatedDistanceToEmptyMiles
+                        eventUpdatedTimestamp { iso unix }
+                    }
+                    odometer {
+                        averageSpeedKmPerHour
+                        eventUpdatedTimestamp { iso unix }
+                        odometerMeters
+                        tripMeterAutomaticKm
+                        tripMeterManualKm
+                    }
+                }
+            }
+            """,
             "GetBatteryData",
             new { vin = _vin });
 
-        return battery;
+        return carTelematics; //carTelematics;
     }
-
-    public async Task<OdometerData> GetOdometerData()
-    {
-        var odometer = await SendQuery<OdometerData>(
-            POLESTAR_API_URL_V2,
-            "query GetOdometerData($vin: String!) { getOdometerData(vin: $vin) { averageSpeedKmPerHour eventUpdatedTimestamp { iso unix __typename } odometerMeters tripMeterAutomaticKm tripMeterManualKm __typename } }",
-            "GetOdometerData",
-            new { vin = _vin });
-
-        return odometer;
-    }
-
+    
     private async Task<string> GetLoginFlowTokens()
     {
         string url = $"https://polestarid.eu.polestar.com/as/authorization.oauth2" +
@@ -179,7 +202,6 @@ public class PolestarApi
         var req = new
         {
             query,
-            operationName,
             variables
         };
 
@@ -195,8 +217,7 @@ public class PolestarApi
             }
 
             var response = await _httpClient.SendAsync(request);
-            var data = await response.Content.ReadFromJsonAsync<T>();
-            return data;
+            return await response.Content.ReadFromJsonAsync<T>();
         }
     }
 }
