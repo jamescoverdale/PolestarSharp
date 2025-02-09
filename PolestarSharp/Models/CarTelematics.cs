@@ -20,8 +20,8 @@ public class CarTelematics
 public class Health
 {
     public string brakeFluidLevelWarning { get; set; }
-    public int daysToService { get; set; }
-    public int distanceToServiceKm { get; set; }
+    public int? daysToService { get; set; }
+    public int? distanceToServiceKm { get; set; }
     public string engineCoolantLevelWarning { get; set; }
     public EventUpdatedTimestamp eventUpdatedTimestamp { get; set; }
     public string oilLevelWarning { get; set; }
@@ -33,22 +33,22 @@ public class Battery
     public double averageEnergyConsumptionKwhPer100Km { get; set; }
     public int batteryChargeLevelPercentage { get; set; }
     public string chargerConnectionStatus { get; set; }
-    public int chargingCurrentAmps { get; set; }
-    public int chargingPowerWatts { get; set; }
+    public int? chargingCurrentAmps { get; set; }
+    public int? chargingPowerWatts { get; set; }
     public string chargingStatus { get; set; }
     public object estimatedChargingTimeMinutesToTargetDistance { get; set; }
-    public int estimatedChargingTimeToFullMinutes { get; set; }
-    public int estimatedDistanceToEmptyKm { get; set; }
-    public int estimatedDistanceToEmptyMiles { get; set; }
+    public int? estimatedChargingTimeToFullMinutes { get; set; }
+    public int? estimatedDistanceToEmptyKm { get; set; }
+    public int? estimatedDistanceToEmptyMiles { get; set; }
     public EventUpdatedTimestamp eventUpdatedTimestamp { get; set; }
 }
 public class Odometer
 {
-    public int averageSpeedKmPerHour { get; set; }
+    public int? averageSpeedKmPerHour { get; set; }
     public EventUpdatedTimestamp eventUpdatedTimestamp { get; set; }
-    public int odometerMeters { get; set; }
-    public int tripMeterAutomaticKm { get; set; }
-    public double tripMeterManualKm { get; set; }
+    public long odometerMeters { get; set; }
+    public double? tripMeterAutomaticKm { get; set; }
+    public double? tripMeterManualKm { get; set; }
 }
 
 public class EventUpdatedTimestamp
