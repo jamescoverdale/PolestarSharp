@@ -110,8 +110,8 @@ public class PolestarApi
                      $"&code_challenge_method=S256";
         
         var data = await _httpClient.GetAsync(url);
-        var resp = data.RequestMessage.RequestUri.AbsoluteUri;
-        var pathToken = Regex.Match(resp, "resumePath=(\\w+)").Groups.Values.ElementAt(1);
+        var body = await data.Content.ReadAsStringAsync();
+        var pathToken = Regex.Match(body, "/as/([a-zA-Z0-9]+)/resume").Groups.Values.ElementAt(1);
 
         return pathToken.Value;
     }
