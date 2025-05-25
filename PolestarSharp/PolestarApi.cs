@@ -58,42 +58,33 @@ public class PolestarApi
         var carTelematics = await SendQuery<CarTelematicsData>(
             POLESTAR_API_URL_V2,
             """
-            query CarTelematics($vin:String!) {
-                carTelematics(vin: $vin) {
+            query CarTelematicsV2($vins:[String!]!) {
+                carTelematicsV2(vins: $vins) {
                     health {
                         brakeFluidLevelWarning
                         daysToService
                         distanceToServiceKm
                         engineCoolantLevelWarning
-                        eventUpdatedTimestamp { iso unix }
                         oilLevelWarning
                         serviceWarning
+                        timestamp { seconds nanos }
                     }
                     battery {
-                        averageEnergyConsumptionKwhPer100Km
                         batteryChargeLevelPercentage
-                        chargerConnectionStatus
-                        chargingCurrentAmps
-                        chargingPowerWatts
                         chargingStatus
-                        estimatedChargingTimeMinutesToTargetDistance
                         estimatedChargingTimeToFullMinutes
                         estimatedDistanceToEmptyKm
-                        estimatedDistanceToEmptyMiles
-                        eventUpdatedTimestamp { iso unix }
+                        timestamp { seconds nanos }
                     }
                     odometer {
-                        averageSpeedKmPerHour
-                        eventUpdatedTimestamp { iso unix }
+                        timestamp { seconds nanos }
                         odometerMeters
-                        tripMeterAutomaticKm
-                        tripMeterManualKm
                     }
                 }
             }
             """,
             "GetBatteryData",
-            new { vin = _vin });
+            new { vins = new string[] {_vin} });
 
         return carTelematics; //carTelematics;
     }

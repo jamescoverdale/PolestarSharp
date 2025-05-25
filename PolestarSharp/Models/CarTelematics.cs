@@ -7,14 +7,14 @@ public class CarTelematicsData
 
 public class Data
 {
-    public CarTelematics carTelematics { get; set; }
+    public CarTelematicsV2 carTelematicsV2 { get; set; }
 }
 
-public class CarTelematics
+public class CarTelematicsV2
 {
-    public Health health { get; set; }
-    public Battery battery { get; set; }
-    public Odometer odometer { get; set; }
+    public Health[] health { get; set; }
+    public Battery[] battery { get; set; }
+    public Odometer[] odometer { get; set; }
 }
 
 public class Health
@@ -23,7 +23,7 @@ public class Health
     public int? daysToService { get; set; }
     public int? distanceToServiceKm { get; set; }
     public string engineCoolantLevelWarning { get; set; }
-    public EventUpdatedTimestamp eventUpdatedTimestamp { get; set; }
+    public EventUpdatedTimestamp timestamp { get; set; }
     public string oilLevelWarning { get; set; }
     public string serviceWarning { get; set; }
 }
@@ -32,28 +32,20 @@ public class Battery
 {
     public double averageEnergyConsumptionKwhPer100Km { get; set; }
     public int batteryChargeLevelPercentage { get; set; }
-    public string chargerConnectionStatus { get; set; }
-    public int? chargingCurrentAmps { get; set; }
-    public int? chargingPowerWatts { get; set; }
     public string chargingStatus { get; set; }
-    public object estimatedChargingTimeMinutesToTargetDistance { get; set; }
     public int? estimatedChargingTimeToFullMinutes { get; set; }
     public int? estimatedDistanceToEmptyKm { get; set; }
-    public int? estimatedDistanceToEmptyMiles { get; set; }
-    public EventUpdatedTimestamp eventUpdatedTimestamp { get; set; }
+    public EventUpdatedTimestamp timestamp { get; set; }
 }
 public class Odometer
 {
-    public int? averageSpeedKmPerHour { get; set; }
-    public EventUpdatedTimestamp eventUpdatedTimestamp { get; set; }
+    public EventUpdatedTimestamp timestamp { get; set; }
     public long odometerMeters { get; set; }
-    public double? tripMeterAutomaticKm { get; set; }
-    public double? tripMeterManualKm { get; set; }
 }
 
 public class EventUpdatedTimestamp
 {
-    public string iso { get; set; }
-    public string unix { get; set; }
+    public string seconds { get; set; }
+    public long nanos { get; set; }
     public string __typename { get; set; }
 }
